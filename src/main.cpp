@@ -55,7 +55,6 @@ struct BVH {
         constructNode(0, static_cast<int>(indices.size()), 0);
     }
 
-    // TODO Q4: write a reset() function that rebuilds the tree instead of refitting it.
     void reset() {
         nodes.clear();
         nodes.push_back({});
@@ -250,7 +249,8 @@ int main() {
     };
     Scene scene;
     for (int n = 0; n < 100; ++n) {
-        scene.createCircle({uniform(0, gScreenWidth), uniform(0, gScreenHeight)}, uniform(10, 20),
+        float radius = uniform(10, 20);
+        scene.createCircle({uniform(radius, gScreenWidth - radius), uniform(radius, gScreenHeight - radius)}, radius,
                            {uniform(0, 1), uniform(0, 1), uniform(0, 1), 1}, {uniform(-1, 1), uniform(-1, 1)});
     }
     BVH bvh(scene.circles);
@@ -267,7 +267,6 @@ int main() {
                 if (key->code == sf::Keyboard::Key::Escape) window.close();
         }
 
-        // TODO Q4: rebuild the BVH with reset() instead of fullRefit().
         scene.update();
         bvh.reset();
         const std::vector<sf::Vector2f> samples = {{-1.f/3.f, -1.f/3.f}, {1.f/3.f, -1.f/3.f}, {-1.f/3.f, 1.f/3.f}, {1.f/3.f, 1.f/3.f}};
