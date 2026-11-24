@@ -1,6 +1,5 @@
 // Lab 12: 2D ray tracing with a BVH. Work through the TODOs below and answer the questions in
 // written.txt.
-// TODO Bonus 2: some circles are drawn with their sides cut off; fix them.
 
 #include <algorithm>
 #include <array>
@@ -38,8 +37,7 @@ struct BVHNode {
     int childAOrIdx = -1;  // if leaf node, first index into index list, else child bvh node ptr
     int childBOrLen = -1;  // if leaf node, length into index list, else child bvh node ptr
     int isLeaf = 0;
-    // TODO Bonus 1: store each node's height in the tree and color its box in Draw by height.
-    int padding = 0;  // to get to POT size of 32 bytes.
+    float height = 0;
 };
 static_assert(sizeof(BVHNode) == 32, "keep BVHNode a power-of-two size");
 
@@ -154,6 +152,7 @@ struct BVH {
         nodes.resize(nodes.size() + 2);  // filled in by the recursive calls
         constructNode(startIdx, smallerCount, childA);
         constructNode(startIdx + smallerCount, numIndices - smallerCount, childB);
+        nodes[bvhOffset].height = std::max(nodes[childA].height, nodes[childB].height) + 1;
     }
 
     // Refit every box bottom-up without changing the tree structure. Children are always stored
@@ -227,13 +226,18 @@ struct Scene {
     std::vector<sf::Vector2f> directions;
 };
 
-void Draw(sf::RenderWindow& window, const AABB<float>& aabb) {
+void Draw(sf::RenderWindow& window, const AABB<float>& aabb, float height, float maxHeight) {
     // draw frame of rectangle
     static sf::RectangleShape shape;
     shape.setSize(aabb.maxPoint - aabb.minPoint);
     shape.setPosition(aabb.minPoint);
     shape.setFillColor(sf::Color::Transparent);
-    shape.setOutlineColor(sf::Color::White);
+    sf::Color color = sf::Color::White;
+    if (maxHeight) {
+        float x = height / maxHeight;
+        color = sf::Color(0, 255*x, 255*x);
+    }
+    shape.setOutlineColor(color);
     shape.setOutlineThickness(1.0f);
     window.draw(shape);
 }
@@ -295,7 +299,7 @@ int main() {
         window.draw(sprite);
         for (const BVHNode& node : bvh.nodes) {
             if (!node.isLeaf) {
-                Draw(window, node.bounds);
+                Draw(window, node.bounds, node.height, bvh.nodes[0].height);
             }
         }
         window.display();
