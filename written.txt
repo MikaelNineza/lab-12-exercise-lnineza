@@ -1,5 +1,12 @@
 ﻿Q3. What happens to the bounding boxes with update + fullRefit?
-
+    The bounding boxes get bigger because the they cover the same grouping
+    of boxes that keep going further apart from each other.
 Q4. What happens with reset (rebuild every frame) instead?
-
+    What happens is that the bounding boxes no longer keep growing
+    because we remake the grouping of each bounding box so it always
+    has circles that are close to each other.
 Q5. Why are some circles drawn with their sides cut off?
+    When drawing a circle, we don't take into account the radius,
+    so that means that it's possible for a circle center to be on
+    one of the sides of the screen and therefore have a part of the circle
+    past the screen.

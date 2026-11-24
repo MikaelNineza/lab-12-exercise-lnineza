@@ -56,6 +56,11 @@ struct BVH {
     }
 
     // TODO Q4: write a reset() function that rebuilds the tree instead of refitting it.
+    void reset() {
+        nodes.clear();
+        nodes.push_back({});
+        constructNode(0, static_cast<int>(indices.size()), 0); 
+    }
 
     void constructNode(int startIdx, int numIndices, int bvhOffset) {
         const std::vector<Circle>& prims = *primitives;
@@ -264,7 +269,7 @@ int main() {
 
         // TODO Q4: rebuild the BVH with reset() instead of fullRefit().
         scene.update();
-        bvh.fullRefit();
+        bvh.reset();
         const std::vector<sf::Vector2f> samples = {{-1.f/3.f, -1.f/3.f}, {1.f/3.f, -1.f/3.f}, {-1.f/3.f, 1.f/3.f}, {1.f/3.f, 1.f/3.f}};
         for (int y = 0; y < gScreenHeight; ++y) {
             for (int x = 0; x < gScreenWidth; ++x) {
