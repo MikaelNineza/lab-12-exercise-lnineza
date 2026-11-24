@@ -193,11 +193,11 @@ bool intersects(sf::Vector2f point, const BVHNode& node, const BVH& bvh, Vector4
 }
 
 // SOA layout for easy buffering
-// TODO Q3: store a 2D movement direction for each circle, and write an update() function that
 // moves every circle by its movement.
 struct Scene {
-    std::size_t createCircle(sf::Vector2f position, float radius, const Vector4f& color) {
+    std::size_t createCircle(sf::Vector2f position, float radius, const Vector4f& color, sf::Vector2f direction) {
         circles.push_back({position, radius, color});
+        directions.push_back(direction);
         return circles.size() - 1;
     }
 
@@ -206,9 +206,21 @@ struct Scene {
         return circles[i];
     }
 
+    sf::Vector2f& direction(std::size_t i) {
+        assert(valid(i));
+        return directions[i];
+    }
+
     bool valid(std::size_t i) const { return i < circles.size(); }
 
+    void update() {
+        for (std::size_t i = 0; i < circles.size(); ++i) {
+            circle(i).position += direction(i);
+        }
+    }
+
     std::vector<Circle> circles;
+    std::vector<sf::Vector2f> directions;
 };
 
 void Draw(sf::RenderWindow& window, const AABB<float>& aabb) {
@@ -234,7 +246,7 @@ int main() {
     Scene scene;
     for (int n = 0; n < 100; ++n) {
         scene.createCircle({uniform(0, gScreenWidth), uniform(0, gScreenHeight)}, uniform(10, 20),
-                           {uniform(0, 1), uniform(0, 1), uniform(0, 1), 1});
+                           {uniform(0, 1), uniform(0, 1), uniform(0, 1), 1}, {uniform(-1, 1), uniform(-1, 1)});
     }
     BVH bvh(scene.circles);
 
@@ -250,14 +262,13 @@ int main() {
                 if (key->code == sf::Keyboard::Key::Escape) window.close();
         }
 
-        // TODO Q3: every frame, call update() on the scene and fullRefit() on the BVH.
         // TODO Q4: rebuild the BVH with reset() instead of fullRefit().
+        scene.update();
+        bvh.fullRefit();
         const std::vector<sf::Vector2f> samples = {{-1.f/3.f, -1.f/3.f}, {1.f/3.f, -1.f/3.f}, {-1.f/3.f, 1.f/3.f}, {1.f/3.f, 1.f/3.f}};
         for (int y = 0; y < gScreenHeight; ++y) {
             for (int x = 0; x < gScreenWidth; ++x) {
                 const sf::Vector2f pixel(static_cast<float>(x), static_cast<float>(y));
-                // TODO Q2: antialiasing. Take four samples at offsets of +-0.3333 from the pixel
-                // and average their colors.
                 Vector4f color{};  // stays transparent black on a miss
                 for (auto sample : samples) {
                     sample += pixel;
