@@ -6,7 +6,7 @@ Q4. What happens with reset (rebuild every frame) instead?
     because we remake the grouping of each bounding box so it always
     has circles that are close to each other.
 Q5. Why are some circles drawn with their sides cut off?
-    When drawing a circle, we don't take into account the radius,
-    so that means that it's possible for a circle center to be on
-    one of the sides of the screen and therefore have a part of the circle
-    past the screen.
+    Their sides are cut off because when building the bounding boxes,
+    we use the position of the circles before they moved and since
+    intersects() will not update the color if there is no hit,
+    the area that is cut off won't be drawn.

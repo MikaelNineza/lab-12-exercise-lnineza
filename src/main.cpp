@@ -253,8 +253,7 @@ int main() {
     };
     Scene scene;
     for (int n = 0; n < 100; ++n) {
-        float radius = uniform(10, 20);
-        scene.createCircle({uniform(radius, gScreenWidth - radius), uniform(radius, gScreenHeight - radius)}, radius,
+        scene.createCircle({uniform(0, gScreenWidth), uniform(0, gScreenHeight)}, uniform(10, 20),
                            {uniform(0, 1), uniform(0, 1), uniform(0, 1), 1}, {uniform(-1, 1), uniform(-1, 1)});
     }
     BVH bvh(scene.circles);
