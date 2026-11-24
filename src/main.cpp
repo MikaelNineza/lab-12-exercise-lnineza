@@ -273,7 +273,9 @@ int main() {
         window.draw(sprite);
         // TODO Q1: only draw non-leaf nodes so the BVH structure is easier to see.
         for (const BVHNode& node : bvh.nodes) {
-            Draw(window, node.bounds);
+            if (!node.isLeaf) {
+                Draw(window, node.bounds);
+            }
         }
         window.display();
     }
