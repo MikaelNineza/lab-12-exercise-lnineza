@@ -252,14 +252,21 @@ int main() {
 
         // TODO Q3: every frame, call update() on the scene and fullRefit() on the BVH.
         // TODO Q4: rebuild the BVH with reset() instead of fullRefit().
-
+        const std::vector<sf::Vector2f> samples = {{-1.f/3.f, -1.f/3.f}, {1.f/3.f, -1.f/3.f}, {-1.f/3.f, 1.f/3.f}, {1.f/3.f, 1.f/3.f}};
         for (int y = 0; y < gScreenHeight; ++y) {
             for (int x = 0; x < gScreenWidth; ++x) {
                 const sf::Vector2f pixel(static_cast<float>(x), static_cast<float>(y));
                 // TODO Q2: antialiasing. Take four samples at offsets of +-0.3333 from the pixel
                 // and average their colors.
                 Vector4f color{};  // stays transparent black on a miss
-                intersects(pixel, bvh.nodes[0], bvh, color);
+                for (auto sample : samples) {
+                    sample += pixel;
+                    Vector4f tempColor{};
+                    intersects(sample, bvh.nodes[0], bvh, tempColor);
+                    color += tempColor;
+                }
+
+                color /= 4.f;
                 const std::size_t i = 4 * (static_cast<std::size_t>(y) * gScreenWidth + x);
                 pixels[i + 0] = static_cast<std::uint8_t>(255 * color.x);  // R
                 pixels[i + 1] = static_cast<std::uint8_t>(255 * color.y);  // G
@@ -271,7 +278,6 @@ int main() {
 
         window.clear();
         window.draw(sprite);
-        // TODO Q1: only draw non-leaf nodes so the BVH structure is easier to see.
         for (const BVHNode& node : bvh.nodes) {
             if (!node.isLeaf) {
                 Draw(window, node.bounds);
